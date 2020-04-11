@@ -1,0 +1,156 @@
+<html>
+<head>
+	<link rel="stylesheet" href="https://unpkg.com/leaflet@1.3.1/dist/leaflet.css">
+	<script src="https://unpkg.com/leaflet@1.3.1/dist/leaflet.js"></script>
+
+<style type="text/css">
+
+#mapcontainer {
+	width: 640px;
+	height: 480px;
+
+}
+
+#editor {
+	float:left;
+	padding: 10px
+}
+
+#resultsbox {
+	float:left;
+	padding: 10px
+}
+
+
+#attributions {
+	clear:left;
+	background-color: #ddd;
+}
+
+#results_table {
+	font-size:x-large;
+}
+#results_table th {
+	background-color:#ddd;
+}
+#results_table td {
+	text-align: right;
+}
+#results_table td.user {
+	text-align: center;
+}
+</style>
+</head>
+<body onload="initMap()">
+<h1>Mapillary Top 10 local leaderboard</h1>
+
+<div id="editor">
+    <div id='mapcontainer'></div>
+
+	<input type="button" class="" id="" value="Check this area" onclick="check()">
+
+
+</div>
+
+<div id="resultsbox">
+<h2>Leaderboard:</h2>
+<pre>
+<span id="results"></span>
+</pre>
+</div>
+
+<div id="attributions">
+<p>Attributions
+<ul>
+<li>User data : Mapillary</li>
+<li>Map: <a href="https://www.openstreetmap.org/copyright">(C)OpenStreetMap contributors</a></li>
+<li>Display map: <a href="https://leafletjs.com/">Leaflet</a></li>
+</ul>
+</div>
+<p>Bug report at <a href="https://github.com/tankaru/">Github</a></p>
+
+<script>
+
+const client_id = 'NEh3V0ZjaE1fT1Nkdk9jMnJlSGNQQToyNzlmZjQxM2U2MjBjMGUy';
+
+let map;
+
+function check(){
+
+	const bbox = map.getBounds().getWest() + ',' + map.getBounds().getSouth() + ',' + map.getBounds().getEast() + ',' + map.getBounds().getNorth();
+	const url = 'https://a.mapillary.com/v3/leaderboard/images?per_page=10&client_id=' + client_id + '&bbox=' + bbox;
+	
+	const request = new XMLHttpRequest();
+	//request.responseType = 'json';
+	request.open('GET', url, true);
+	request.onload = function () {
+		const leaderboard = JSON.parse(this.response);
+		//document.getElementById("results").innerText = JSON.stringify(leaderboard, null, 4);
+		let table = '<table id="results_table">';
+		table += '<tr><th>#</th><th>User</th><th>Counts</th></tr>';
+		
+		const lat = map.getCenter().lat;
+		const lon = map.getCenter().lng;
+		const zoom = map.getZoom();
+		
+		for (let i=0; i < leaderboard.length; i++){
+			const leader = leaderboard[i];
+			const username = leader.username;
+			const ahref = 'https://www.mapillary.com/app/user/' + username + '?tab=uploads&username=' + username + '&lat=' + lat + '&lng=' + lon + '&z=' + zoom;
+			table += '<tr><td>' + (i+1) + '</td><td class="user">' + '<a href="' + ahref + '">' + username + '</a>' + '</td><td>' + leader.image_count + '</td></tr>';
+
+			//changeset_contents.push({id: changeset_markers.getLayerId(marker), changes: changeset.changes});
+		}
+		table += '</table>';
+		document.getElementById("results").innerHTML = table;
+	};
+	request.send();
+}
+
+//http://ktgis.net/service/leafletlearn/index.html
+function initMap() {
+
+  //地図を表示するdiv要素のidを設定
+  map = L.map('mapcontainer');
+  //地図の中心とズームレベルを指定
+  map.setView([37.9243912, 139.045191], 5);
+
+  //表示するタイルレイヤのURLとAttributionコントロールの記述を設定して、地図に追加する
+  let osmLayer = L.tileLayer('http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+	  attribution: "(C)<a href='https://www.openstreetmap.org/copyright' target='_blank'>OpenStreetMap contributors</a>",
+	  maxZoom: 21,
+	  maxNativeZoom: 19,
+	  minZoom: 1,
+	  //maxBounds: [[35.47, 139.62], [35.45, 139.64]],
+  }).addTo(map);
+
+/*
+  var kokudoLayer = L.tileLayer('https://cyberjapandata.gsi.go.jp/xyz/ort/{z}/{x}/{y}.jpg',{
+    attribution: '© <a href="https://maps.gsi.go.jp/development/ichiran.html">国土地理院</a>',
+	});
+*/
+	let baseMap = {
+		"OpenStreetMap":osmLayer,
+		//"国土地理院オルソ":kokudoLayer,
+	};
+ 
+	var mapillaryLayer = L.tileLayer('https://raster-tiles.mapillary.com/v0.1/{z}/{x}/{y}.png',{
+		attribution: '(C)<a href="https://www.mapillary.com/">Mapillary</a>, CC BY',
+	  maxZoom: 21,
+	  maxNativeZoom: 17,
+	});
+	mapillaryLayer.setOpacity(0.65);
+	var overlayLayer = {
+		"Mapillary":mapillaryLayer,
+	}
+
+	//レイヤ設定
+	var layerControl = L.control.layers(baseMap,overlayLayer,{"collapsed":true,});
+	layerControl.addTo(map);
+
+}
+
+</script>
+</body>
+</html>
+
