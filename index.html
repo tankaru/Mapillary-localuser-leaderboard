@@ -87,7 +87,7 @@ function check(){
 		const leaderboard = JSON.parse(this.response);
 		//document.getElementById("results").innerText = JSON.stringify(leaderboard, null, 4);
 		let table = '<table id="results_table">';
-		table += '<tr><th>#</th><th>User</th><th>Counts</th></tr>';
+		table += '<tr><th>#</th><th>User</th><th>Image Counts</th></tr>';
 		
 		const lat = map.getCenter().lat;
 		const lon = map.getCenter().lng;
