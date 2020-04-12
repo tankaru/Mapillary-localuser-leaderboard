@@ -2,7 +2,7 @@
 <head>
 	<link rel="stylesheet" href="https://unpkg.com/leaflet@1.3.1/dist/leaflet.css">
 	<script src="https://unpkg.com/leaflet@1.3.1/dist/leaflet.js"></script>
-
+	<script src="leaflet-hash.js"></script>
 <style type="text/css">
 
 #mapcontainer {
@@ -109,11 +109,21 @@ function check(){
 
 //http://ktgis.net/service/leafletlearn/index.html
 function initMap() {
-
+  
   //地図を表示するdiv要素のidを設定
   map = L.map('mapcontainer');
-  //地図の中心とズームレベルを指定
-  map.setView([37.9243912, 139.045191], 5);
+  //url末尾に座標を付ける
+	var hash = new L.Hash(map);
+	
+	//URLに座標が付いていたらその場所を初期位置にする。
+	const url = location.href;
+	const match = url.match(/#(\d{1,2})\/(-?\d[0-9.]*)\/(-?\d[0-9.]*)/);
+	if (match){
+		const [, zoom, lat, lon] = match;
+		map.setView([lat, lon], zoom);
+	} else {
+		map.setView([37.9243912, 139.045191], 5);	//日本全域
+	}
 
   //表示するタイルレイヤのURLとAttributionコントロールの記述を設定して、地図に追加する
   let osmLayer = L.tileLayer('http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -139,7 +149,8 @@ function initMap() {
 	  maxZoom: 21,
 	  maxNativeZoom: 17,
 	});
-	mapillaryLayer.setOpacity(0.65);
+	//デフォルトでMapillaryレイヤを表示
+	mapillaryLayer.setOpacity(0.65).addTo(map);
 	var overlayLayer = {
 		"Mapillary":mapillaryLayer,
 	}
