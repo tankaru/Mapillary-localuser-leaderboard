@@ -39,6 +39,12 @@
 #results_table td.user {
 	text-align: center;
 }
+
+#filters {
+	background-color:#ccc;
+	margin: 10px;
+}
+
 </style>
 </head>
 <body onload="initMap()">
@@ -47,10 +53,17 @@
 <div id="editor">
     <div id='mapcontainer'></div>
 
+	<div id="filters">
+        <p style="margin-bottom:0;">Filter</p>
+            <ul style="margin-top: 0;">
+                <!--<li>User: <input type="text" size="20" id="usernames" title="Mapillary username" value="">-->
+                <li>Date: From <input type="date" id="start_time" value="">,  To <input type="date" id="end_time" value="">
+            </ul>
+    </div>
 	<input type="button" class="" id="" value="Check this area" onclick="check()">
-
-
 </div>
+
+
 
 <div id="resultsbox">
 <h2>Leaderboard:</h2>
@@ -67,6 +80,7 @@
 <li>Display map: <a href="https://leafletjs.com/">Leaflet</a></li>
 </ul>
 </div>
+<p>Use <a href="https://www.mapillary.com/app/stats">Official leaderboard</a> to specify Country/Region/City/Locality.</p>
 <p>Bug report at <a href="https://github.com/tankaru/">Github</a></p>
 
 <script>
@@ -78,7 +92,21 @@ let map;
 function check(){
 
 	const bbox = map.getBounds().getWest() + ',' + map.getBounds().getSouth() + ',' + map.getBounds().getEast() + ',' + map.getBounds().getNorth();
-	const url = 'https://a.mapillary.com/v3/leaderboard/images?per_page=10&client_id=' + client_id + '&bbox=' + bbox;
+	
+	//Set filters
+	const start_time = document.getElementById("start_time").value;	
+	const end_time = document.getElementById("end_time").value;	
+	let filters = "", userfilters = "";
+	if (start_time != "") {
+		filters += '&start_time=' + start_time;
+		userfilters += '&dateFrom=' + start_time;
+	};	
+	if (end_time != "") {
+		filters += '&end_time=' + end_time;	
+		userfilters += '&dateTo=' + end_time;	
+	};
+	
+	const url = 'https://a.mapillary.com/v3/leaderboard/images?per_page=10&client_id=' + client_id + '&bbox=' + bbox + filters ;
 	
 	const request = new XMLHttpRequest();
 	//request.responseType = 'json';
@@ -96,7 +124,7 @@ function check(){
 		for (let i=0; i < leaderboard.length; i++){
 			const leader = leaderboard[i];
 			const username = leader.username;
-			const ahref = 'https://www.mapillary.com/app/user/' + username + '?tab=uploads&username=' + username + '&lat=' + lat + '&lng=' + lon + '&z=' + zoom;
+			const ahref = 'https://www.mapillary.com/app/user/' + username + '?tab=uploads&username=' + username + '&lat=' + lat + '&lng=' + lon + '&z=' + zoom + userfilters;
 			table += '<tr><td>' + (i+1) + '</td><td class="user">' + '<a href="' + ahref + '">' + username + '</a>' + '</td><td>' + leader.image_count + '</td></tr>';
 
 			//changeset_contents.push({id: changeset_markers.getLayerId(marker), changes: changeset.changes});
