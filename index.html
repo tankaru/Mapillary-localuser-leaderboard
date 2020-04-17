@@ -13,9 +13,17 @@
 #mapcontainer {
 	max-width: 640px;
 	min-width: 300px;
-	height: 480px;
-
 }
+
+@media screen and (max-height:480px) {
+	#mapcontainer {height:200px;}
+}
+
+@media screen and (min-height:480px) {
+	#mapcontainer {height:480;}
+}
+
+
 
 #attributions {
 	background-color: #ddd;
