@@ -11,17 +11,11 @@
 <style type="text/css">
 
 #mapcontainer {
+	height: 480px;
 	max-width: 640px;
-	min-width: 300px;
+
 }
 
-@media screen and (max-height:480px) {
-	#mapcontainer {height:200px;}
-}
-
-@media screen and (min-height:480px) {
-	#mapcontainer {height:480;}
-}
 
 
 
@@ -31,8 +25,6 @@ table {
 }
 #filters {
 	background-color:#ccc;
-	margin: 10px;
-	width: 620;
 }
 
 </style>
@@ -43,12 +35,12 @@ table {
 	</div>
 
 
-<div class="container">
+<div class="container-fluid">
 	<div class="row">
 
-		<div style="background-color:" class="col-xl-8 col-sm-12">
+		<div style="background-color:" class="col-md-8">
 			<div id='mapcontainer'></div>
-			<div id="filters">
+			<div id="filters" style="max-width:640px">
 				<p style="margin-bottom:0;">Filter</p>
 				<ul style="margin-top: 0;">
 					<!--<li>User: <input type="text" size="20" id="usernames" title="Mapillary username" value="">-->
@@ -56,11 +48,14 @@ table {
 							value="">
 				</ul>
 			</div>
+			<div class="spinner-border text-primary" role="status" id="spinner" style="display:none">
+				<span class="sr-only">Loading...</span>
+			</div>
 			<input type="button" class="btn btn-primary" id="" value="Check this area" onclick="check()">
 		</div>
 
 
-		<div style="background-color:" class="col-xl-4">
+		<div style="background-color:" class="col-md-4">
 			<h2>Leaderboard:</h2>
 			<pre>
 	<span id="results"></span>
@@ -71,18 +66,25 @@ table {
 	</div>
 </div>
 
-<div class="container-fluid bg-secondary text-light">
+<div class="container-fluid alert-secondary">
 	<div id="attributions">
 			<ul>
 				<li>User data : Mapillary</li>
 				<li>Map: <a href="https://www.openstreetmap.org/copyright">(C)OpenStreetMap contributors</a></li>
 				<li>Display map: <a href="https://leafletjs.com/">Leaflet</a></li>
+				<li>Use <a href="https://www.mapillary.com/app/stats">Official leaderboard</a> to specify
+					Country/Region/City/Locality.</li>
+				<li>Bug report at <a href="https://github.com/tankaru/">Github</a></li>
 			</ul>
 	</div>
-	<p>Use <a href="https://www.mapillary.com/app/stats">Official leaderboard</a> to specify
-		Country/Region/City/Locality.</p>
-	<p>Bug report at <a href="https://github.com/tankaru/">Github</a></p>
+
+
 </div>
+
+<script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.6/umd/popper.min.js" integrity="sha384-wHAiFfRlMFy6i5SRaxvfOCifBUQy1xHdJ/yoi7FRNXMRBu5WHdZYu1hA6ZOblgut" crossorigin="anonymous"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.2.1/js/bootstrap.min.js" integrity="sha384-B0UglyR+jN6CkvvICOB2joaf5I4l3gm9GU6Hc1og6Ls7i6U/mkkaduKaBhlAXv9k" crossorigin="anonymous"></script>
+
 <script>
 
 const client_id = 'NEh3V0ZjaE1fT1Nkdk9jMnJlSGNQQToyNzlmZjQxM2U2MjBjMGUy';
@@ -90,6 +92,7 @@ const client_id = 'NEh3V0ZjaE1fT1Nkdk9jMnJlSGNQQToyNzlmZjQxM2U2MjBjMGUy';
 let map;
 
 function check(){
+	jQuery("#spinner").css("display", "inline-block");
 
 	const bbox = map.getBounds().getWest() + ',' + map.getBounds().getSouth() + ',' + map.getBounds().getEast() + ',' + map.getBounds().getNorth();
 	
@@ -128,6 +131,8 @@ function check(){
 			table += '<tr><td class="text-right">' + (i+1) + '</td><td class="text-center">' + '<a href="' + ahref + '">' + username + '</a>' + '</td><td class="text-right">' + leader.image_count + '</td></tr>';
 
 			//changeset_contents.push({id: changeset_markers.getLayerId(marker), changes: changeset.changes});
+
+			jQuery("#spinner").css("display", "none");
 		}
 		table += '</table>';
 		document.getElementById("results").innerHTML = table;
